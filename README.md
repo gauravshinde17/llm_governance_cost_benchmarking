@@ -61,6 +61,23 @@ The biggest problem is not the vendor — it is the allocation policy.
 
 ---
 
+## Recommendations
+
+| Workload | Recommended Provider | Reason |
+|---|---|---|
+| Compliance Grade | Cohere or Anthropic | Cohere: lowest hallucination (7.3), highest governance (93.62). Anthropic: faster at 791ms when latency matters. |
+| Analytical | OpenAI | Consistent governance across workloads at mid-range cost. |
+| Exploratory | Google or Mistral | Fast, cheap, quality adequate for low-stakes queries. |
+
+**Five actions:**
+1. Enforce tier-workload governance policy — eliminates misallocation immediately
+2. Block Mistral from compliance workloads — hallucination risk unacceptable for regulated reporting
+3. Standardize Cohere or Anthropic for compliance grade
+4. Use Google or Mistral for exploratory workloads
+5. Monitor Mistral hallucination scores quarterly
+
+---
+
 ## Database
 
 | Table | Rows | Purpose |
@@ -94,7 +111,8 @@ The biggest problem is not the vendor — it is the allocation policy.
 
 ## Documentation
 
-Full project documentation in `06_Documentation/` — 7 files covering architecture, methodology, KPI definitions, governance framework, and insights interpretation.
+Full project documentation in `06_Documentation/` — 6 files covering architecture, methodology, KPI definitions, and governance framework.
+Insights and interpretation in `07_Insights/`.
 
 ---
 
