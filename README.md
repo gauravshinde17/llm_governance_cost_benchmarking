@@ -41,7 +41,7 @@ A SQL-first analytics engineering pipeline that benchmarks 5 LLM providers acros
 ![D1 Overview](08_Dashboard/01_Overview.png)
 
 **D5 — Risk & Cost**
-![D5 Risk & Cost](08_Dashboard/02_Risk & Cost.png)
+![D5 Risk & Cost](08_Dashboard/02_Risk%20&%20Cost.png)
 
 **D6 — Recommendations**
 ![D6 Recommendations](08_Dashboard/03_Recommendations.png)
