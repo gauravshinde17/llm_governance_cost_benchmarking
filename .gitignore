@@ -2,3 +2,5 @@
 .vscode/
 __pycache__/
 *.pyc
+09_dbt/.venv/
+09_dbt/target/

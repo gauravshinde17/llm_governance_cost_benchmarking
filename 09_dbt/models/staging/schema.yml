@@ -1,0 +1,247 @@
+version: 2
+
+models:
+  - name: stg_phonepe_transactions
+    description: "Staged PhonePe Pulse transaction data. Raw ingestion boundary — 5,034 rows."
+    columns:
+      - name: state
+        description: "Indian state name"
+        tests:
+          - not_null
+      - name: year
+        description: "Transaction year"
+        tests:
+          - not_null
+      - name: quarter
+        description: "Quarter (1-4)"
+        tests:
+          - not_null
+      - name: transaction_type
+        description: "Type of digital transaction"
+        tests:
+          - not_null
+      - name: transaction_count
+        description: "Number of transactions"
+      - name: transaction_amount_rupees
+        description: "Total transaction value in rupees"
+      - name: transaction_amount_crore
+        description: "Total transaction value in crore rupees"
+      - name: avg_transaction_value
+        description: "Average value per transaction"
+      - name: region
+        description: "Geographic region of the state"
+
+  - name: stg_state_kpi_summary
+    description: "Staged state-level KPI aggregates. 252 rows — one per state/year combination."
+    columns:
+      - name: state
+        description: "Indian state name"
+        tests:
+          - not_null
+      - name: year
+        description: "KPI year"
+        tests:
+          - not_null
+      - name: total_transaction_value_rupees
+        description: "Total transaction value in rupees for the state/year"
+      - name: total_transaction_count
+        description: "Total transaction count for the state/year"
+      - name: yoy_value_growth
+        description: "Year-over-year growth in transaction value"
+      - name: yoy_count_growth
+        description: "Year-over-year growth in transaction count"
+      - name: state_value_rank
+        description: "State rank by total transaction value"
+      - name: state_growth_rank
+        description: "State rank by YoY growth"
+      - name: top_transaction_type
+        description: "Dominant transaction type for the state/year"
+      - name: top_transaction_type_share
+        description: "Share of top transaction type as a percentage"
+      - name: anomaly_flag
+        description: "Flag indicating anomalous KPI values"
+      - name: data_version
+        description: "Version of the data pipeline that generated this row"
+      - name: generated_timestamp
+        description: "Timestamp when the KPI row was generated"
+      - name: kpi_hash
+        description: "Hash of KPI values for change detection"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_prompt_versions
+    description: "Staged governance prompt definitions. 6 rows — 3 tiers x 2 versions."
+    columns:
+      - name: prompt_id
+        description: "Primary key"
+        tests:
+          - not_null
+          - unique
+      - name: prompt_name
+        description: "Name of the prompt"
+        tests:
+          - not_null
+      - name: governance_level
+        description: "Governance tier: exploratory, analytical, or compliance_grade"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['exploratory', 'analytical', 'compliance_grade']
+      - name: prompt_template
+        description: "Full prompt template text sent to the LLM"
+      - name: version_label
+        description: "Version identifier (v1 or v2)"
+        tests:
+          - not_null
+      - name: created_at
+        description: "Timestamp when prompt version was created"
+
+  - name: stg_model_versions
+    description: "Staged LLM model registry. 10 rows — 5 providers, 10 models with 2026 pricing."
+    columns:
+      - name: model_id
+        description: "Primary key"
+        tests:
+          - not_null
+          - unique
+      - name: provider
+        description: "LLM provider name"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['OpenAI', 'Anthropic', 'Cohere', 'Google', 'Mistral']
+      - name: model_name
+        description: "Model identifier name"
+        tests:
+          - not_null
+      - name: model_tier
+        description: "Model tier classification"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['lightweight', 'balanced', 'enterprise']
+      - name: input_cost_per_1k_tokens
+        description: "Input token cost per 1,000 tokens in USD"
+        tests:
+          - not_null
+      - name: output_cost_per_1k_tokens
+        description: "Output token cost per 1,000 tokens in USD"
+        tests:
+          - not_null
+      - name: pricing_version
+        description: "Pricing version identifier"
+        tests:
+          - not_null
+      - name: currency_code
+        description: "Currency code — always USD"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['USD']
+      - name: effective_from
+        description: "Date from which this pricing is effective"
+      - name: effective_to
+        description: "Date until which this pricing is effective (NULL = current)"
+      - name: created_at
+        description: "Timestamp when model version was created"
+
+  - name: stg_experiment_runs
+    description: "Staged experiment run log. 5,388 rows — all LLM inference executions."
+    columns:
+      - name: run_id
+        description: "Primary key"
+        tests:
+          - not_null
+          - unique
+      - name: model_id
+        description: "Foreign key to stg_model_versions"
+        tests:
+          - not_null
+      - name: prompt_id
+        description: "Foreign key to stg_prompt_versions"
+        tests:
+          - not_null
+      - name: state
+        description: "State used as context for this run"
+        tests:
+          - not_null
+      - name: year
+        description: "Year used as context for this run"
+        tests:
+          - not_null
+      - name: input_tokens
+        description: "Number of input tokens consumed"
+      - name: output_tokens
+        description: "Number of output tokens generated"
+      - name: total_tokens
+        description: "Total tokens (input + output)"
+      - name: latency_ms
+        description: "Model response latency in milliseconds"
+      - name: response_text
+        description: "Simulated LLM response text"
+      - name: run_timestamp
+        description: "Timestamp of the experiment run"
+
+  - name: stg_evaluation_results
+    description: "Staged LLM output evaluation scores. 5,388 rows — one per experiment run."
+    columns:
+      - name: evaluation_id
+        description: "Primary key"
+        tests:
+          - not_null
+          - unique
+      - name: run_id
+        description: "Foreign key to stg_experiment_runs"
+        tests:
+          - not_null
+      - name: evaluation_version
+        description: "Version of the evaluation engine used"
+      - name: evaluation_engine
+        description: "Name of the evaluation engine"
+      - name: numeric_accuracy_score
+        description: "Accuracy of numeric values in LLM output (0-100)"
+      - name: hallucination_score
+        description: "Hallucination risk score (0-100, lower is better)"
+      - name: structural_compliance_score
+        description: "Structural format compliance score (0-100)"
+      - name: governance_composite_index
+        description: "Weighted composite governance score (0-100)"
+      - name: evaluation_notes
+        description: "Free-text notes from the evaluation engine"
+      - name: evaluated_at
+        description: "Timestamp when evaluation was completed"
+
+  - name: stg_cost_analysis
+    description: "Staged cost breakdown per experiment run. 5,388 rows — one per run."
+    columns:
+      - name: cost_id
+        description: "Primary key"
+        tests:
+          - not_null
+          - unique
+      - name: run_id
+        description: "Foreign key to stg_experiment_runs — unique constraint enforced"
+        tests:
+          - not_null
+          - unique
+      - name: input_cost
+        description: "Cost of input tokens in USD"
+        tests:
+          - not_null
+      - name: output_cost
+        description: "Cost of output tokens in USD"
+        tests:
+          - not_null
+      - name: total_cost
+        description: "Total cost in USD (input_cost + output_cost)"
+        tests:
+          - not_null
+      - name: currency_code
+        description: "Currency code — always USD"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['USD']
+      - name: calculated_at
+        description: "Timestamp when cost was calculated"

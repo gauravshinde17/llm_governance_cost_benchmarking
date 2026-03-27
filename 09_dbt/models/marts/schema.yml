@@ -1,0 +1,90 @@
+version: 2
+
+models:
+  - name: mart_provider_scorecard
+    description: "Final provider scorecard table. Joins provider ranking with cost waste data. 15 rows — 5 providers x 3 governance levels. Power BI D6 source."
+    columns:
+      - name: provider
+        description: "LLM provider name"
+        tests:
+          - not_null
+      - name: governance_level
+        description: "Governance tier"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['exploratory', 'analytical', 'compliance_grade']
+      - name: overall_rank
+        description: "Final composite rank per governance level"
+        tests:
+          - not_null
+      - name: performance_tier
+        description: "Performance tier label"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Top Performer', 'Strong Performer', 'Moderate Performer', 'Below Average', 'Underperformer']
+      - name: avg_governance_score
+        description: "Average governance composite index"
+        tests:
+          - not_null
+      - name: avg_cost
+        description: "Average total cost per run in USD"
+        tests:
+          - not_null
+      - name: avg_latency
+        description: "Average latency in milliseconds"
+        tests:
+          - not_null
+
+  - name: mart_cost_waste_summary
+    description: "Cost waste and governance score loss from misallocated model tier assignments. Power BI cost waste analysis source."
+    columns:
+      - name: provider
+        description: "LLM provider name"
+        tests:
+          - not_null
+      - name: governance_level
+        description: "Governance tier"
+        tests:
+          - not_null
+      - name: allocation_status
+        description: "Compliant or Misallocated"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Compliant', 'Misallocated']
+      - name: total_runs
+        description: "Total number of runs in this group"
+        tests:
+          - not_null
+      - name: waste_severity
+        description: "Waste severity label"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Low Waste', 'Moderate Waste', 'High Waste']
+
+  - name: mart_tier_compliance
+    description: "Compliance rate, misallocation rate, and score delta per governance level and model tier. Power BI compliance analysis source."
+    columns:
+      - name: governance_level
+        description: "Governance tier"
+        tests:
+          - not_null
+      - name: model_tier
+        description: "Model tier"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['lightweight', 'balanced', 'enterprise']
+      - name: compliance_rate_pct
+        description: "Percentage of compliant runs"
+        tests:
+          - not_null
+      - name: compliance_health
+        description: "Compliance health label"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Healthy', 'Moderate Risk', 'High Risk']

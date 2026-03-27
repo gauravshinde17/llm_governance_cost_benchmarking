@@ -1,5 +1,5 @@
 # LLM Governance & Cost Benchmarking Framework
-**Analytics Engineering · Data Analysis · MySQL · Power BI · Python**
+**Analytics Engineering · Data Analysis · MySQL · dbt · Power BI · Python**
 
 ---
 
@@ -15,7 +15,7 @@ This project builds the data infrastructure to measure all three and delivers a 
 
 ## What I Built
 
-A SQL-first analytics engineering pipeline that benchmarks 5 LLM providers across 3 fintech governance workloads using real PhonePe Pulse transaction data. All business logic lives in MySQL. Power BI reads directly from SQL views — zero transformation.
+A SQL-first analytics engineering pipeline that benchmarks 5 LLM providers across 3 fintech governance workloads using real PhonePe Pulse transaction data. All business logic lives in MySQL. A dbt layer sits on top for transformation modeling, testing, and lineage. Power BI reads from mart tables — zero transformation.
 
 ---
 
@@ -31,6 +31,7 @@ A SQL-first analytics engineering pipeline that benchmarks 5 LLM providers acros
 |---|---|---|
 | Ingestion | Python | CSV load only — no business logic |
 | Warehouse | MySQL | All KPI logic, scoring, cost calculation, views |
+| Transformation | dbt | Staging · intermediate · mart modeling, 104 tests |
 | Visualization | Power BI | 6-dashboard executive layer — zero transformation |
 
 ---
@@ -90,7 +91,25 @@ The biggest problem is not the vendor — it is the allocation policy.
 | evaluation_results | 5,388 | Tier-weighted composite governance scores |
 | cost_analysis | 5,388 | Token-level cost · real pricing rates |
 
-11 SQL views feed Power BI directly.
+---
+
+## dbt Layer
+
+21 models across 3 layers — 104 tests, 0 failures.
+
+| Layer | Models | Output | Purpose |
+|---|---|---|---|
+| Staging | 7 | Views | Clean and rename source tables |
+| Intermediate | 11 | Views | Rebuild all SQL views with ref() dependencies |
+| Marts | 3 | Tables | Power BI-ready final tables |
+
+**Run the full pipeline:**
+```bash
+cd 09_dbt
+.venv\Scripts\activate
+dbt run
+dbt test
+```
 
 ---
 
@@ -105,6 +124,7 @@ The biggest problem is not the vendor — it is the allocation policy.
 06_Documentation/   # 7 project documentation files
 07_Insights/        # Insights and interpretation
 08_Dashboard/       # Dashboard screenshots
+09_dbt/             # dbt project — staging · intermediate · marts · tests
 ```
 
 ---

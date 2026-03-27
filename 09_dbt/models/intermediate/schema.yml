@@ -1,0 +1,191 @@
+version: 2
+
+models:
+  - name: int_governance_benchmark_base
+    description: "Core join of all 5 source tables. Foundation for all downstream intermediate and mart models."
+    columns:
+      - name: run_id
+        description: "Primary key from experiment_runs"
+        tests:
+          - not_null
+          - unique
+      - name: provider
+        description: "LLM provider name"
+        tests:
+          - not_null
+      - name: governance_level
+        description: "Governance tier for this run"
+        tests:
+          - not_null
+      - name: total_cost
+        description: "Total cost of this run in USD"
+        tests:
+          - not_null
+      - name: governance_composite_index
+        description: "Weighted composite governance score"
+        tests:
+          - not_null
+
+  - name: int_cost_per_governance_point
+    description: "Average cost per governance score point per provider, model, and governance level."
+    columns:
+      - name: provider
+        description: "LLM provider name"
+        tests:
+          - not_null
+      - name: model_name
+        description: "Model name"
+        tests:
+          - not_null
+      - name: governance_level
+        description: "Governance tier"
+        tests:
+          - not_null
+
+  - name: int_governance_efficiency
+    description: "Governance score earned per dollar spent — higher is better."
+    columns:
+      - name: provider
+        description: "LLM provider name"
+        tests:
+          - not_null
+      - name: model_name
+        description: "Model name"
+        tests:
+          - not_null
+      - name: governance_level
+        description: "Governance tier"
+        tests:
+          - not_null
+
+  - name: int_provider_efficiency
+    description: "Provider-level aggregation of score, cost, latency, and cost-efficiency."
+    columns:
+      - name: provider
+        description: "LLM provider name"
+        tests:
+          - not_null
+      - name: governance_level
+        description: "Governance tier"
+        tests:
+          - not_null
+
+  - name: int_latency_cost_tradeoff
+    description: "Latency vs cost vs governance score per model and governance level."
+    columns:
+      - name: provider
+        description: "LLM provider name"
+        tests:
+          - not_null
+      - name: model_name
+        description: "Model name"
+        tests:
+          - not_null
+      - name: governance_level
+        description: "Governance tier"
+        tests:
+          - not_null
+
+  - name: int_misallocation_impact
+    description: "Average score and cost by governance level and model tier — shows misallocation effect."
+    columns:
+      - name: governance_level
+        description: "Governance tier"
+        tests:
+          - not_null
+      - name: model_tier
+        description: "Model tier"
+        tests:
+          - not_null
+
+  - name: int_allocation_optimization
+    description: "Cost efficiency and governance efficiency per governance level and model tier combination."
+    columns:
+      - name: governance_level
+        description: "Governance tier"
+        tests:
+          - not_null
+      - name: model_tier
+        description: "Model tier"
+        tests:
+          - not_null
+
+  - name: int_provider_ranking
+    description: "Multi-dimensional provider ranking using DENSE_RANK across governance, cost, latency, and hallucination."
+    columns:
+      - name: provider
+        description: "LLM provider name"
+        tests:
+          - not_null
+      - name: governance_level
+        description: "Governance tier"
+        tests:
+          - not_null
+      - name: overall_rank
+        description: "Final composite rank per governance level"
+        tests:
+          - not_null
+      - name: performance_tier
+        description: "Performance tier label"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Top Performer', 'Strong Performer', 'Moderate Performer', 'Below Average', 'Underperformer']
+
+  - name: int_cost_waste_analysis
+    description: "Cost waste and governance score loss from misallocated model tier assignments."
+    columns:
+      - name: provider
+        description: "LLM provider name"
+        tests:
+          - not_null
+      - name: governance_level
+        description: "Governance tier"
+        tests:
+          - not_null
+      - name: allocation_status
+        description: "Compliant or Misallocated"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Compliant', 'Misallocated']
+
+  - name: int_model_stability_summary
+    description: "Model governance score consistency across states using STDDEV. Lower STDDEV = more stable."
+    columns:
+      - name: provider
+        description: "LLM provider name"
+        tests:
+          - not_null
+      - name: model_name
+        description: "Model name"
+        tests:
+          - not_null
+      - name: governance_level
+        description: "Governance tier"
+        tests:
+          - not_null
+      - name: stability_label
+        description: "Stability classification label"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Highly Stable', 'Stable', 'Moderate Variance', 'High Variance']
+
+  - name: int_tier_compliance_summary
+    description: "Compliance rate, misallocation rate, and score delta per governance level and model tier."
+    columns:
+      - name: governance_level
+        description: "Governance tier"
+        tests:
+          - not_null
+      - name: model_tier
+        description: "Model tier"
+        tests:
+          - not_null
+      - name: compliance_health
+        description: "Compliance health label"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Healthy', 'Moderate Risk', 'High Risk']
